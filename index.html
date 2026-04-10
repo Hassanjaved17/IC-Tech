@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ICTech.pk — Networking & Tech Accessories Karachi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══ NAV ══════════════════════════════ -->
+<nav class="nav">
+  <a href="#" class="nav-logo">IC<span>Tech</span>.pk</a>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#products">Products</a></li>
+    <li><a href="#categories">Categories</a></li>
+    <li><a href="#why-us">Why Us</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+
+  <div class="nav-right">
+    <a class="btn-wa" href="https://wa.me/923170111244" target="_blank" rel="noopener">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      WhatsApp
+    </a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+  </div>
+</nav>
+
+<!-- ══ HERO ══════════════════════════════ -->
+<section class="hero" aria-label="Hero">
+  <div class="hero-grid-bg" aria-hidden="true"></div>
+  <div class="hero-radial"  aria-hidden="true"></div>
+
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <div class="badge-dot" aria-hidden="true"></div>
+      Karachi's Trusted Tech Store
+    </div>
+
+    <h1>Your Local Hub for<br><em>Networking</em> &amp; Tech Gear</h1>
+
+    <p class="hero-sub">
+      Fiber optics, routers, CCTV systems, mobile accessories, computers &amp; more —
+      all in one place with direct WhatsApp ordering.
+    </p>
+
+    <div class="hero-actions">
+      <a class="btn-primary" href="#products">
+        Browse Products
+      </a>
+      <a class="btn-outline" href="https://wa.me/923170111244" target="_blank" rel="noopener">
+        Order via WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ STATS BAR ══════════════════════════ -->
+<div class="stats-bar" aria-label="Store statistics">
+  <div class="stat"><div class="stat-num">150+</div><div class="stat-label">Products</div></div>
+  <div class="stat"><div class="stat-num">10+</div><div class="stat-label">Categories</div></div>
+  <div class="stat"><div class="stat-num">Fast</div><div class="stat-label">WhatsApp Orders</div></div>
+  <div class="stat"><div class="stat-num">Karachi</div><div class="stat-label">Based &amp; Trusted</div></div>
+</div>
+
+<!-- ══ CATEGORIES ══════════════════════════ -->
+<div class="section" id="categories">
+  <div class="section-header">
+    <h2 class="section-title">Browse by Category</h2>
+  </div>
+  <div class="cats-wrap" id="catsWrap" role="tablist" aria-label="Product categories">
+    <button class="cat-chip active" data-cat="all"        role="tab" aria-selected="true">🔌 All Products</button>
+    <button class="cat-chip"        data-cat="networking" role="tab" aria-selected="false">📡 Networking</button>
+    <button class="cat-chip"        data-cat="fiber"      role="tab" aria-selected="false">🔆 Fiber Optic</button>
+    <button class="cat-chip"        data-cat="cameras"    role="tab" aria-selected="false">📷 CCTV &amp; Cameras</button>
+    <button class="cat-chip"        data-cat="mobile"     role="tab" aria-selected="false">📱 Mobile Accessories</button>
+    <button class="cat-chip"        data-cat="computer"   role="tab" aria-selected="false">💻 Computer</button>
+    <button class="cat-chip"        data-cat="electric"   role="tab" aria-selected="false">⚡ Electric / Solar</button>
+    <button class="cat-chip"        data-cat="android"    role="tab" aria-selected="false">📺 Android Box</button>
+    <button class="cat-chip"        data-cat="connectors" role="tab" aria-selected="false">🔧 Connectors &amp; Tools</button>
+  </div>
+</div>
+
+<!-- ══ PRODUCTS ══════════════════════════ -->
+<div class="section" id="products" style="padding-top: 0;">
+  <div class="section-header">
+    <h2 class="section-title" id="productsSectionTitle">All Products</h2>
+    <span class="section-link" id="productsCount"></span>
+  </div>
+  <div class="products-grid" id="productsGrid" role="list" aria-label="Products"></div>
+</div>
+
+<!-- ══ WHY US ══════════════════════════ -->
+<section class="why-section" id="why-us" aria-labelledby="whyTitle">
+  <div class="why-inner">
+    <h2 class="section-title" id="whyTitle">Why Choose IC Tech?</h2>
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="why-icon" aria-hidden="true">📦</div>
+        <h3 class="why-title">Stocked &amp; Ready</h3>
+        <p class="why-desc">Most items available immediately. Real-time stock status shown on every product — no guessing.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" aria-hidden="true">💬</div>
+        <h3 class="why-title">WhatsApp Ordering</h3>
+        <p class="why-desc">Order directly via WhatsApp — no complex checkout, no accounts needed. Just tap and message.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" aria-hidden="true">🌐</div>
+        <h3 class="why-title">Networking Specialists</h3>
+        <p class="why-desc">Deep expertise in fiber optics, routers, switches, ONU/ONT devices, and full CCTV installations.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" aria-hidden="true">🔔</div>
+        <h3 class="why-title">Stock Alerts</h3>
+        <p class="why-desc">Item sold out? WhatsApp us and we'll notify you the moment it's back in stock.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" aria-hidden="true">📍</div>
+        <h3 class="why-title">Karachi Based</h3>
+        <p class="why-desc">Locally operated in Karachi with knowledge of local ISP requirements and network standards.</p>
+      </div>
+      <div class="why-card">
+        <div class="why-icon" aria-hidden="true">💡</div>
+        <h3 class="why-title">Wide Product Range</h3>
+        <p class="why-desc">From a 20 PKR fiber joiner to a 11,000 PKR SFP module — we carry all sizes and budgets.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ══════════════════════════ -->
+<section class="cta-section" id="contact" aria-labelledby="ctaTitle">
+  <div class="cta-glow" aria-hidden="true"></div>
+  <h2 id="ctaTitle">Ready to Order?</h2>
+  <p>Open WhatsApp and start chatting with us directly — we'll help you find exactly what you need.</p>
+  <div class="cta-actions">
+    <a class="btn-primary" href="https://wa.me/923170111244" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+      </svg>
+      Chat on WhatsApp
+    </a>
+    <a class="btn-outline" href="https://www.google.com/maps?q=24.8315556,67.1675556" target="_blank" rel="noopener">
+      📍 Find Us on Map
+    </a>
+  </div>
+</section>
+
+<!-- ══ FOOTER ══════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">IC<span>Tech</span>.pk</div>
+      <p class="footer-desc">Your trusted networking and tech accessories store in Karachi, Pakistan. Quality products, fast WhatsApp ordering.</p>
+    </div>
+
+    <div class="footer-col">
+      <h4>Categories</h4>
+      <ul>
+        <li><a href="#products">Networking Products</a></li>
+        <li><a href="#products">Fiber Optic</a></li>
+        <li><a href="#products">CCTV &amp; Cameras</a></li>
+        <li><a href="#products">Router &amp; Switch</a></li>
+        <li><a href="#products">Mobile Accessories</a></li>
+        <li><a href="#products">Android Box</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Quick Links</h4>
+      <ul>
+        <li><a href="#">Home</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#why-us">About Us</a></li>
+        <li><a href="https://wa.me/923170111244" target="_blank" rel="noopener">WhatsApp Order</a></li>
+        <li><a href="https://www.google.com/maps?q=24.8315556,67.1675556" target="_blank" rel="noopener">Store Location</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="https://wa.me/923170111244" target="_blank" rel="noopener">+92 317 011 1244</a></li>
+        <li><a href="https://www.google.com/maps?q=24.8315556,67.1675556" target="_blank" rel="noopener">Karachi, Pakistan</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <p class="footer-copy">© 2025 ICTech.pk · All rights reserved · Karachi, Pakistan</p>
+    <a class="footer-map-link" href="https://www.google.com/maps?q=24.8315556,67.1675556" target="_blank" rel="noopener">
+      📍 View on Google Maps
+    </a>
+  </div>
+</footer>
+
+
+
+  <script src="script.js"></script>
+</body>
+</html>
