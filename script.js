@@ -84,7 +84,7 @@ let activeCat    = 'all';
 let searchQuery  = '';
 let visibleCount = 10;
 const PAGE_SIZE  = 10;
-
+// © Hassan Javed - All rights reserved
 const CAT_LABELS = {
   all: 'All Products', networking: 'Networking Products',
   fiber: 'Fiber Optic', cameras: 'CCTV & Cameras',
@@ -132,7 +132,7 @@ function buildCard(p) {
   const pillClass = inStock ? 'in' : 'out';
   const pillText  = inStock ? 'In Stock' : 'Sold Out';
   const name      = highlight(p.name, searchQuery);
-
+// © Hassan Javed - All rights reserved
   return '<article class="prod-card" role="listitem">' +
     '<div class="prod-thumb" aria-hidden="true">' + buildThumb(p) + '</div>' +
     '<div class="prod-body">' +
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
     searchQuery = '';
     if (searchInput) { searchInput.value = ''; searchClear.hidden = true; }
     dropdown.hidden = true;
-
+// © Hassan Javed - All rights reserved
     renderProducts(true);
 
     var sec = document.getElementById('products');
@@ -772,3 +772,30 @@ document.addEventListener('click', function (e) {
   if (!prodBtn) return;
   showToast('Opening WhatsApp…');
 });
+
+// Disable right-click
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Disable F12, Ctrl+Shift+I, Ctrl+U
+document.addEventListener('keydown', e => {
+  if (
+    e.key === 'F12' ||
+    (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+    (e.ctrlKey && e.key === 'u')
+  ) {
+    e.preventDefault();
+  }
+});
+
+
+const threshold = 160;
+setInterval(() => {
+  if (
+    window.outerWidth - window.innerWidth > threshold ||
+    window.outerHeight - window.innerHeight > threshold
+  ) {
+    document.body.innerHTML = ""; // Clear page if DevTools opened
+  }
+}, 1000);
+
+// © 2025 ICTech.pk | Designed by [Hassan Javed]
