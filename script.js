@@ -127,7 +127,7 @@ function buildThumb(p) {
 function buildCard(p) {
   const inStock   = p.stock;
   const btnClass  = inStock ? '' : ' notify';
-  const btnIcon   = inStock ? '🛒' : '🔔';
+  const btnIcon   = inStock ? '<i class="fa-brands fa-whatsapp"></i>' : '<i class="fa-solid fa-bell"></i>';
   const btnText   = inStock ? 'Buy via WhatsApp' : 'Notify When Available';
   const pillClass = inStock ? 'in' : 'out';
   const pillText  = inStock ? 'In Stock' : 'Sold Out';
@@ -174,10 +174,10 @@ function updateSeeMoreBtn(filtered) {
   if (hasMore) {
     const left = filtered.length - visibleCount;
     seeMoreLbl.textContent = 'See More Products (' + left + ' more)';
-    seeMoreBtn.classList.remove('expanded');
+    seeMoreBtn.classList.remove('expanded'); document.getElementById('seeMoreIcon').style.transform = 'rotate(0deg)';
   } else {
     seeMoreLbl.textContent = 'See Less';
-    seeMoreBtn.classList.add('expanded');
+    seeMoreBtn.classList.add('expanded'); document.getElementById('seeMoreIcon').style.transform = 'rotate(180deg)';
   }
 }
 
@@ -489,3 +489,286 @@ document.addEventListener('DOMContentLoaded', function() {
   renderProducts(true);
 
 }); // end DOMContentLoaded
+
+/* ══════════════════════════════════════════════════
+   FEATURE 1 — FLOATING WA + BACK TO TOP
+══════════════════════════════════════════════════ */
+(function () {
+  var backBtn = document.getElementById('backToTop');
+
+  window.addEventListener('scroll', function () {
+    if (window.scrollY > 400) {
+      backBtn.hidden = false;
+      setTimeout(function () { backBtn.classList.add('visible'); }, 10);
+    } else {
+      backBtn.classList.remove('visible');
+      setTimeout(function () { backBtn.hidden = true; }, 300);
+    }
+  }, { passive: true });
+
+  if (backBtn) {
+    backBtn.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+})();
+
+/* ══════════════════════════════════════════════════
+   FEATURE 2 — QUICK-VIEW MODAL
+══════════════════════════════════════════════════ */
+var currentModalProduct = null;
+
+function openModal(product) {
+  currentModalProduct = product;
+  var overlay  = document.getElementById('modalOverlay');
+  var imgEl    = document.getElementById('modalImg');
+  var catEl    = document.getElementById('modalCat');
+  var nameEl   = document.getElementById('modalName');
+  var priceEl  = document.getElementById('modalPrice');
+  var stockEl  = document.getElementById('modalStock');
+  var buyBtn   = document.getElementById('modalBuyBtn');
+  var copied   = document.getElementById('modalCopied');
+
+  var CAT_DISPLAY = {
+    all: 'General', networking: 'Networking', fiber: 'Fiber Optic',
+    cameras: 'CCTV & Cameras', mobile: 'Mobile Accessories',
+    computer: 'Computer', electric: 'Electric / Solar',
+    android: 'Android Box', connectors: 'Connectors & Tools'
+  };
+
+  // Populate
+  imgEl.innerHTML = (product.icon.includes('/') || product.icon.includes('.'))
+    ? '<img src="' + product.icon + '" alt="' + product.name + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'">'
+    : product.icon;
+
+  catEl.textContent   = CAT_DISPLAY[product.cat] || product.cat;
+  nameEl.textContent  = product.name;
+  priceEl.textContent = product.price.toLocaleString() + ' PKR';
+
+  stockEl.textContent  = product.stock ? 'In Stock' : 'Sold Out';
+  stockEl.className    = 'modal-stock ' + (product.stock ? 'in' : 'out');
+
+  var waMsg  = product.stock
+    ? 'I want to buy: ' + product.wa
+    : 'I need this product when available: ' + product.wa;
+  buyBtn.href = 'https://wa.me/923170111244?text=' + encodeURIComponent(waMsg);
+
+  copied.hidden = true;
+  overlay.hidden = false;
+  document.body.style.overflow = 'hidden';
+
+  // Buy button fires toast too
+  buyBtn.onclick = function () {
+    showToast('Opening WhatsApp for ' + product.name + '…');
+  };
+}
+
+function closeModal() {
+  var overlay = document.getElementById('modalOverlay');
+  overlay.hidden = true;
+  document.body.style.overflow = '';
+  currentModalProduct = null;
+}
+
+// Close on overlay click / ESC
+document.getElementById('modalOverlay').addEventListener('click', function (e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') closeModal();
+});
+document.getElementById('modalClose').addEventListener('click', closeModal);
+
+// Share button — copies WA link to clipboard
+document.getElementById('modalShareBtn').addEventListener('click', function () {
+  if (!currentModalProduct) return;
+  var waMsg = 'Check out this product from ICTech.pk: ' + currentModalProduct.name +
+              ' — PKR ' + currentModalProduct.price.toLocaleString() +
+              '\nhttps://wa.me/923170111244?text=' + encodeURIComponent('I want to buy: ' + currentModalProduct.wa);
+  navigator.clipboard.writeText(waMsg).then(function () {
+    var copied = document.getElementById('modalCopied');
+    copied.hidden = false;
+    setTimeout(function () { copied.hidden = true; }, 2500);
+  }).catch(function () {
+    showToast('Could not copy — try manually!');
+  });
+});
+
+/* ══════════════════════════════════════════════════
+   FEATURE 3 — TOAST
+══════════════════════════════════════════════════ */
+var toastTimer = null;
+
+function showToast(msg) {
+  var toast   = document.getElementById('toast');
+  var toastMsg = document.getElementById('toastMsg');
+  if (!toast) return;
+  toastMsg.textContent = msg || 'Opening WhatsApp…';
+  toast.classList.add('show');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function () {
+    toast.classList.remove('show');
+  }, 2800);
+}
+
+/* ══════════════════════════════════════════════════
+   FEATURE 4 — SORT & FILTER (price range + stock)
+══════════════════════════════════════════════════ */
+var sortMode   = 'default';
+var priceMin   = null;
+var priceMax   = null;
+var stockOnly  = false;
+
+// Override getFiltered to include sort + price + stock filters
+var _baseGetFiltered = getFiltered;
+getFiltered = function () {
+  var list = _baseGetFiltered();
+
+  // Stock filter
+  if (stockOnly) {
+    list = list.filter(function (p) { return p.stock; });
+  }
+
+  // Price range filter
+  if (priceMin !== null) {
+    list = list.filter(function (p) { return p.price >= priceMin; });
+  }
+  if (priceMax !== null) {
+    list = list.filter(function (p) { return p.price <= priceMax; });
+  }
+
+  // Sort
+  var sorted = list.slice();
+  if (sortMode === 'price-asc')  sorted.sort(function (a, b) { return a.price - b.price; });
+  if (sortMode === 'price-desc') sorted.sort(function (a, b) { return b.price - a.price; });
+  if (sortMode === 'name-asc')   sorted.sort(function (a, b) { return a.name.localeCompare(b.name); });
+  if (sortMode === 'name-desc')  sorted.sort(function (a, b) { return b.name.localeCompare(a.name); });
+  if (sortMode === 'instock')    sorted.sort(function (a, b) { return (b.stock ? 1 : 0) - (a.stock ? 1 : 0); });
+
+  return sorted;
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  // Sort select
+  var sortSel = document.getElementById('sortSelect');
+  if (sortSel) {
+    sortSel.addEventListener('change', function () {
+      sortMode = this.value;
+      renderProducts(false);
+    });
+  }
+
+  // Price apply
+  var priceApply = document.getElementById('priceApply');
+  var priceReset = document.getElementById('priceReset');
+  var minInput   = document.getElementById('priceMin');
+  var maxInput   = document.getElementById('priceMax');
+
+  if (priceApply) {
+    priceApply.addEventListener('click', function () {
+      var minVal = parseInt(minInput.value, 10);
+      var maxVal = parseInt(maxInput.value, 10);
+      priceMin = isNaN(minVal) ? null : minVal;
+      priceMax = isNaN(maxVal) ? null : maxVal;
+      priceReset.hidden = (priceMin === null && priceMax === null);
+      renderProducts(true);
+    });
+  }
+
+  // Enter key on price inputs
+  [minInput, maxInput].forEach(function (inp) {
+    if (!inp) return;
+    inp.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') priceApply && priceApply.click();
+    });
+  });
+
+  // Price reset
+  if (priceReset) {
+    priceReset.addEventListener('click', function () {
+      priceMin = null; priceMax = null;
+      minInput.value = ''; maxInput.value = '';
+      this.hidden = true;
+      renderProducts(true);
+    });
+  }
+
+  // Stock only toggle
+  var stockChk = document.getElementById('stockOnly');
+  if (stockChk) {
+    stockChk.addEventListener('change', function () {
+      stockOnly = this.checked;
+      renderProducts(true);
+    });
+  }
+
+  // ── SKELETON on category switch ─────────────────
+  // Override catsWrap click to show skeleton briefly
+  var catsWrap = document.getElementById('catsWrap');
+  if (catsWrap) {
+    catsWrap.addEventListener('click', function (e) {
+      var chip = e.target.closest('.cat-chip');
+      if (!chip) return;
+      showSkeletons();
+    }, true); // capture phase so it fires before the main handler
+  }
+
+});
+
+/* ══════════════════════════════════════════════════
+   FEATURE 4b — SKELETON LOADERS
+══════════════════════════════════════════════════ */
+function buildSkeleton() {
+  return '<div class="skeleton">' +
+    '<div class="skel-thumb"></div>' +
+    '<div class="skel-body">' +
+      '<div class="skel-line lg"></div>' +
+      '<div class="skel-line md"></div>' +
+      '<div class="skel-line sm"></div>' +
+      '<div class="skel-line btn"></div>' +
+    '</div>' +
+  '</div>';
+}
+
+function showSkeletons(count) {
+  count = count || 12;
+  var grid = document.getElementById('productsGrid');
+  if (!grid) return;
+  var html = '';
+  for (var i = 0; i < count; i++) html += buildSkeleton();
+  grid.innerHTML = html;
+  document.getElementById('seeMoreWrap').hidden = true;
+}
+
+/* ══════════════════════════════════════════════════
+   QUICK-VIEW BUTTON — injected into each card
+   Override buildCard to add quick-view button
+══════════════════════════════════════════════════ */
+var _baseBuildCard = buildCard;
+buildCard = function (p) {
+  var html    = _baseBuildCard(p);
+  var idx     = PRODUCTS.indexOf(p);
+  var qvBtn   = '<button class="prod-quickview" data-idx="' + idx + '" aria-label="Quick view ' + p.name + '">' +
+                '<i class="fa-solid fa-eye"></i></button>';
+  // Insert quick-view button right after <article class="prod-card"...>
+  html = html.replace('<div class="prod-thumb"', qvBtn + '<div class="prod-thumb"');
+  return html;
+};
+
+// Delegate quick-view click on the grid
+document.addEventListener('click', function (e) {
+  var qvBtn = e.target.closest('.prod-quickview');
+  if (!qvBtn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  var idx = parseInt(qvBtn.dataset.idx, 10);
+  if (!isNaN(idx) && PRODUCTS[idx]) openModal(PRODUCTS[idx]);
+});
+
+// Toast on every WhatsApp buy button click in the grid
+document.addEventListener('click', function (e) {
+  var prodBtn = e.target.closest('.prod-btn:not(.notify)');
+  if (!prodBtn) return;
+  showToast('Opening WhatsApp…');
+});
