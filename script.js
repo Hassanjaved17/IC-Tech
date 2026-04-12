@@ -2,22 +2,25 @@
    ICTech.pk — script.js
    Features:
      • Product data & rendering
+     • See More / See Less (12 at a time)
+     • Staggered card entrance animations
      • Category filter
      • Live search with dropdown + full-grid filtering
-     • Mobile nav toggle
+     • Mobile nav toggle + mobile search injection
+     • AOS init
 ═══════════════════════════════════════════════════ */
 
 // ─── Product Data ─────────────────────────────────
 const PRODUCTS = [
-  { name: "BNC Cable",                              price: 150,  stock: true,  icon: "./images/product1.jpg", cat: "connectors", wa: "BNC Cable, Price: 150 PKR" },
-  { name: "Cleaver Fiber Optic",                    price: 5000, stock: false, icon: "./images/product2.jpg", cat: "fiber",       wa: "Cleaver Fiber Optic, Price: 5000 PKR" },
-  { name: "USB Cable Printer",                      price: 300,  stock: true,  icon: "./images/product1.jpg", cat: "computer",    wa: "USB Cable Printer, Price: 300 PKR" },
-  { name: "GM220-s China Router XPon",              price: 2300, stock: true,  icon: "./images/product2.jpg", cat: "networking",  wa: "GM220-s China Router XPon, Price: 2300 PKR" },
-  { name: "MT Link Cat6 UTP Cable 1M",              price: 250,  stock: true,  icon: "./images/product1.jpg", cat: "networking",  wa: "MT Link Cat6 UTP Cable 1M, Price: 250 PKR" },
-  { name: "MT-1704 Single Band XPon",               price: 4700, stock: false, icon: "./images/product2.jpg", cat: "networking",  wa: "MT-1704 Single Band XPon, Price: 4700 PKR" },
-  { name: "DC Battery Charger 12V",                 price: 600,  stock: true,  icon: "./images/product1.jpg", cat: "electric",    wa: "DC Battery Charger 12V, Price: 600 PKR" },
-  { name: "MT-1704 Dual Band XPon",                 price: 6800, stock: true,  icon: "./images/product2.jpg", cat: "networking",  wa: "MT-1704 Dual Band XPon, Price: 6800 PKR" },
-  { name: "Fiber Optic Power Meter & VFL",          price: 7500, stock: true,  icon: "./images/product1.jpg", cat: "fiber",       wa: "Fiber Optic Power Meter & VFL, Price: 7500 PKR" },
+  { name: "BNC Cable",                              price: 150,  stock: true,  icon: "./images/product1.jpg",  cat: "connectors", wa: "BNC Cable, Price: 150 PKR" },
+  { name: "Cleaver Fiber Optic",                    price: 5000, stock: false, icon: "./images/product2.jpg",  cat: "fiber",       wa: "Cleaver Fiber Optic, Price: 5000 PKR" },
+  { name: "USB Cable Printer",                      price: 300,  stock: true,  icon: "./images/product1.jpg",  cat: "computer",    wa: "USB Cable Printer, Price: 300 PKR" },
+  { name: "GM220-s China Router XPon",              price: 2300, stock: true,  icon: "./images/product2.jpg",  cat: "networking",  wa: "GM220-s China Router XPon, Price: 2300 PKR" },
+  { name: "MT Link Cat6 UTP Cable 1M",              price: 250,  stock: true,  icon: "./images/product1.jpg",  cat: "networking",  wa: "MT Link Cat6 UTP Cable 1M, Price: 250 PKR" },
+  { name: "MT-1704 Single Band XPon",               price: 4700, stock: false, icon: "./images/product2.jpg",  cat: "networking",  wa: "MT-1704 Single Band XPon, Price: 4700 PKR" },
+  { name: "DC Battery Charger 12V",                 price: 600,  stock: true,  icon: "./images/product1.jpg",  cat: "electric",    wa: "DC Battery Charger 12V, Price: 600 PKR" },
+  { name: "MT-1704 Dual Band XPon",                 price: 6800, stock: true,  icon: "./images/product2.jpg",  cat: "networking",  wa: "MT-1704 Dual Band XPon, Price: 6800 PKR" },
+  { name: "Fiber Optic Power Meter & VFL",          price: 7500, stock: true,  icon: "./images/product1.jpg",  cat: "fiber",       wa: "Fiber Optic Power Meter & VFL, Price: 7500 PKR" },
   { name: "4-Core TOP Fiber Optic Cable (per m)",   price: 42,   stock: true,  icon: "./images/product2.jpg", cat: "fiber",       wa: "4-Core TOP Fiber Optic, Price: 42 PKR" },
   { name: "VGA Computer Cable",                     price: 500,  stock: true,  icon: "./images/product1.jpg", cat: "computer",    wa: "VGA Computer Cable, Price: 500 PKR" },
   { name: "SSD G Fire 128GB",                       price: 3500, stock: true,  icon: "./images/product2.jpg", cat: "computer",    wa: "SSD G Fire 128GB, Price: 3500 PKR" },
@@ -76,10 +79,11 @@ const PRODUCTS = [
   { name: "BT Bluetooth Wireless Adapter",          price: 450,  stock: true,  icon: "./images/product1.jpg", cat: "mobile",      wa: "BT Bluetooth Wireless Adapter, Price: 450 PKR" },
 ];
 
-
 // ─── State ────────────────────────────────────────
-let activeCat   = 'all';
-let searchQuery = '';
+let activeCat    = 'all';
+let searchQuery  = '';
+let visibleCount = 10;
+const PAGE_SIZE  = 10;
 
 const CAT_LABELS = {
   all: 'All Products', networking: 'Networking Products',
@@ -97,87 +101,159 @@ function waUrl(product, inStock) {
   return 'https://wa.me/923170111244?text=' + encodeURIComponent(msg);
 }
 
-/** Highlight matching text with <mark> */
 function highlight(text, query) {
   if (!query) return text;
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark>$1</mark>');
+  return text.replace(new RegExp('(' + escaped + ')', 'gi'), '<mark>$1</mark>');
 }
 
-/** Filter products by category AND search query */
 function getFiltered() {
-  let list = activeCat === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.cat === activeCat);
+  let list = activeCat === 'all' ? PRODUCTS : PRODUCTS.filter(function(p) { return p.cat === activeCat; });
   if (searchQuery) {
     const q = searchQuery.toLowerCase();
-    list = list.filter(p => p.name.toLowerCase().includes(q));
+    list = list.filter(function(p) { return p.name.toLowerCase().includes(q); });
   }
   return list;
 }
 
-// ─── Render Product Grid ──────────────────────────
-function renderProducts() {
-  const grid     = document.getElementById('productsGrid');
-  const titleEl  = document.getElementById('productsSectionTitle');
-  const countEl  = document.getElementById('productsCount');
-  const noRes    = document.getElementById('noResults');
-  const activeBar = document.getElementById('searchActiveBar');
+function buildThumb(p) {
+  if (p.icon.includes('/') || p.icon.includes('.')) {
+    return '<img src="' + p.icon + '" alt="' + p.name + '" loading="lazy" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'">';
+  }
+  return p.icon;
+}
+
+// ─── Build single card HTML ───────────────────────
+function buildCard(p) {
+  const inStock   = p.stock;
+  const btnClass  = inStock ? '' : ' notify';
+  const btnIcon   = inStock ? '🛒' : '🔔';
+  const btnText   = inStock ? 'Buy via WhatsApp' : 'Notify When Available';
+  const pillClass = inStock ? 'in' : 'out';
+  const pillText  = inStock ? 'In Stock' : 'Sold Out';
+  const name      = highlight(p.name, searchQuery);
+
+  return '<article class="prod-card" role="listitem">' +
+    '<div class="prod-thumb" aria-hidden="true">' + buildThumb(p) + '</div>' +
+    '<div class="prod-body">' +
+      '<p class="prod-name">' + name + '</p>' +
+      '<div class="prod-meta">' +
+        '<span class="prod-price">' + p.price.toLocaleString() + ' PKR</span>' +
+        '<span class="stock-pill ' + pillClass + '">' + pillText + '</span>' +
+      '</div>' +
+      '<a class="prod-btn' + btnClass + '" href="' + waUrl(p, inStock) + '" target="_blank" rel="noopener">' +
+        btnIcon + ' ' + btnText +
+      '</a>' +
+    '</div>' +
+  '</article>';
+}
+
+// ─── Staggered animation trigger ─────────────────
+function animateCards(cards) {
+  cards.forEach(function(card, i) {
+    setTimeout(function() {
+      card.classList.add('card-visible');
+    }, Math.min(i * 45, 450));
+  });
+}
+
+// ─── Update See More button state ────────────────
+function updateSeeMoreBtn(filtered) {
+  const seeMoreWrap = document.getElementById('seeMoreWrap');
+  const seeMoreBtn  = document.getElementById('seeMoreBtn');
+  const seeMoreLbl  = document.getElementById('seeMoreLabel');
+
+  if (filtered.length <= PAGE_SIZE) {
+    seeMoreWrap.hidden = true;
+    return;
+  }
+
+  seeMoreWrap.hidden = false;
+  const hasMore = visibleCount < filtered.length;
+
+  if (hasMore) {
+    const left = filtered.length - visibleCount;
+    seeMoreLbl.textContent = 'See More Products (' + left + ' more)';
+    seeMoreBtn.classList.remove('expanded');
+  } else {
+    seeMoreLbl.textContent = 'See Less';
+    seeMoreBtn.classList.add('expanded');
+  }
+}
+
+// ─── Render full product grid (re-render) ─────────
+function renderProducts(resetCount) {
+  if (resetCount === undefined) resetCount = true;
+  if (resetCount) visibleCount = PAGE_SIZE;
+
+  const grid        = document.getElementById('productsGrid');
+  const titleEl     = document.getElementById('productsSectionTitle');
+  const countEl     = document.getElementById('productsCount');
+  const noRes       = document.getElementById('noResults');
+  const activeBar   = document.getElementById('searchActiveBar');
   const activeLabel = document.getElementById('searchActiveLabel');
 
   const filtered = getFiltered();
 
-  // Section title
+  // Title & count
   titleEl.textContent = searchQuery
-    ? `Search: "${searchQuery}"`
-    : CAT_LABELS[activeCat] || 'Products';
-
+    ? 'Results for "' + searchQuery + '"'
+    : (CAT_LABELS[activeCat] || 'Products');
   countEl.textContent = filtered.length + ' item' + (filtered.length !== 1 ? 's' : '');
 
-  // Search active banner
-  if (searchQuery) {
-    activeBar.hidden = false;
-    activeLabel.textContent = `Showing results for "${searchQuery}"`;
-  } else {
-    activeBar.hidden = true;
-  }
+  // Search banner
+  activeBar.hidden = !searchQuery;
+  if (searchQuery) activeLabel.textContent = 'Showing results for "' + searchQuery + '"';
 
-  // No results
+  // Empty state
   if (filtered.length === 0) {
     grid.innerHTML = '';
     noRes.hidden = false;
+    document.getElementById('seeMoreWrap').hidden = true;
     return;
   }
   noRes.hidden = true;
 
-  grid.innerHTML = filtered.map(p => {
-    const inStock   = p.stock;
-    const btnClass  = inStock ? '' : ' notify';
-    const btnIcon   = inStock ? '🛒' : '🔔';
-    const btnText   = inStock ? 'Buy via WhatsApp' : 'Notify When Available';
-    const pillClass = inStock ? 'in' : 'out';
-    const pillText  = inStock ? 'In Stock' : 'Sold Out';
-    const displayName = highlight(p.name, searchQuery);
+  const toShow = filtered.slice(0, visibleCount);
+  grid.innerHTML = toShow.map(buildCard).join('');
 
-    return `
-      <article class="prod-card" role="listitem">
-        <div class="prod-thumb" aria-hidden="true">
-          ${p.icon.includes('/') || p.icon.includes('.')
-            ? `<img src="${p.icon}" alt="${p.name}" loading="lazy" onerror="this.parentElement.innerHTML='📦'">`
-            : p.icon
-          }
-        </div>
-        <div class="prod-body">
-          <p class="prod-name">${displayName}</p>
-          <div class="prod-meta">
-            <span class="prod-price">${p.price.toLocaleString()} PKR</span>
-            <span class="stock-pill ${pillClass}">${pillText}</span>
-          </div>
-          <a class="prod-btn${btnClass}" href="${waUrl(p, inStock)}" target="_blank" rel="noopener">
-            ${btnIcon} ${btnText}
-          </a>
-        </div>
-      </article>
-    `;
-  }).join('');
+  // Animate cards
+  animateCards(Array.from(grid.querySelectorAll('.prod-card')));
+
+  // See more/less
+  updateSeeMoreBtn(filtered);
+}
+
+// ─── Append next page of cards ────────────────────
+function appendMoreCards() {
+  const filtered  = getFiltered();
+  const prevCount = visibleCount;
+  visibleCount    = Math.min(visibleCount + PAGE_SIZE, filtered.length);
+
+  const grid = document.getElementById('productsGrid');
+  const newItems = filtered.slice(prevCount, visibleCount);
+
+  const newCards = [];
+  newItems.forEach(function(p) {
+    const tmp = document.createElement('div');
+    tmp.innerHTML = buildCard(p);
+    const card = tmp.firstElementChild;
+    grid.appendChild(card);
+    newCards.push(card);
+  });
+
+  // Small double-RAF to ensure DOM paint before animating
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      newCards.forEach(function(card, i) {
+        setTimeout(function() {
+          card.classList.add('card-visible');
+        }, i * 45);
+      });
+    });
+  });
+
+  updateSeeMoreBtn(filtered);
 }
 
 // ─── Search Dropdown ──────────────────────────────
@@ -194,10 +270,10 @@ function renderDropdown(query) {
   }
 
   const q       = query.toLowerCase();
-  const matches = PRODUCTS.filter(p => p.name.toLowerCase().includes(q));
+  const matches = PRODUCTS.filter(function(p) { return p.name.toLowerCase().includes(q); });
 
   if (matches.length === 0) {
-    dropdown.innerHTML = `<div class="search-no-results">No products found for "<strong>${query}</strong>"</div>`;
+    dropdown.innerHTML = '<div class="search-no-results">No products found for "<strong>' + query + '</strong>"</div>';
     dropdown.hidden = false;
     input.setAttribute('aria-expanded', 'true');
     return;
@@ -206,223 +282,210 @@ function renderDropdown(query) {
   const shown = matches.slice(0, MAX_DROPDOWN);
   const more  = matches.length - MAX_DROPDOWN;
 
-  dropdown.innerHTML =
-    shown.map(p => `
-      <a class="search-result-item" href="${waUrl(p, p.stock)}" target="_blank" rel="noopener" role="option">
-        <div class="sri-icon">
-          ${p.icon.includes('/') || p.icon.includes('.')
-            ? `<img src="${p.icon}" alt="${p.name}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" onerror="this.parentElement.innerHTML='📦'">`
-            : p.icon
-          }
-        </div>
-        <div class="sri-info">
-          <div class="sri-name">${highlight(p.name, query)}</div>
-          <div class="sri-meta">
-            <span class="sri-price">${p.price.toLocaleString()} PKR</span>
-            <span class="sri-pill ${p.stock ? 'in' : 'out'}">${p.stock ? 'In Stock' : 'Sold Out'}</span>
-          </div>
-        </div>
-      </a>
-    `).join('') +
-    (more > 0
-      ? `<div class="search-dropdown-footer" id="dropdownSeeAll">See all ${matches.length} results ↓</div>`
-      : '');
+  var html = shown.map(function(p) {
+    return '<a class="search-result-item" href="' + waUrl(p, p.stock) + '" target="_blank" rel="noopener" role="option">' +
+      '<div class="sri-icon">' + buildThumb(p) + '</div>' +
+      '<div class="sri-info">' +
+        '<div class="sri-name">' + highlight(p.name, query) + '</div>' +
+        '<div class="sri-meta">' +
+          '<span class="sri-price">' + p.price.toLocaleString() + ' PKR</span>' +
+          '<span class="sri-pill ' + (p.stock ? 'in' : 'out') + '">' + (p.stock ? 'In Stock' : 'Sold Out') + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</a>';
+  }).join('');
 
+  if (more > 0) {
+    html += '<div class="search-dropdown-footer" id="dropdownSeeAll">See all ' + matches.length + ' results ↓</div>';
+  }
+
+  dropdown.innerHTML = html;
   dropdown.hidden = false;
   input.setAttribute('aria-expanded', 'true');
 
-  // "See all" click → close dropdown, update grid
-  const seeAll = document.getElementById('dropdownSeeAll');
+  var seeAll = document.getElementById('dropdownSeeAll');
   if (seeAll) {
-    seeAll.addEventListener('click', () => {
-      commitSearch(query);
-    });
+    seeAll.addEventListener('click', function() { commitSearch(query); });
   }
 }
 
-/** Commit search: close dropdown, filter grid, scroll to products */
+// ─── Commit search to grid ────────────────────────
 function commitSearch(query) {
   searchQuery = query;
   document.getElementById('searchDropdown').hidden = true;
   document.getElementById('searchInput').setAttribute('aria-expanded', 'false');
-  renderProducts();
-  // Reset active category chip to "All" so search works across all
+
   if (query) {
     activeCat = 'all';
-    document.querySelectorAll('.cat-chip').forEach(c => {
+    document.querySelectorAll('.cat-chip').forEach(function(c) {
       c.classList.toggle('active', c.dataset.cat === 'all');
       c.setAttribute('aria-selected', c.dataset.cat === 'all' ? 'true' : 'false');
     });
-    const productsSection = document.getElementById('products');
-    const offset = productsSection.getBoundingClientRect().top + window.scrollY - 90;
+  }
+
+  renderProducts(true);
+
+  if (query) {
+    var sec = document.getElementById('products');
+    var offset = sec.getBoundingClientRect().top + window.scrollY - 90;
     window.scrollTo({ top: offset, behavior: 'smooth' });
   }
 }
 
-/** Clear search entirely */
+// ─── Clear search ────────────────────────────────
 function clearSearch() {
   searchQuery = '';
-  document.getElementById('searchInput').value = '';
-  document.getElementById('searchClear').hidden = true;
+  var si = document.getElementById('searchInput');
+  var sc = document.getElementById('searchClear');
+  var mi = document.getElementById('mobileSearchInput');
+  var mc = document.getElementById('mobileSearchClear');
+  if (si) { si.value = ''; si.setAttribute('aria-expanded', 'false'); }
+  if (sc) sc.hidden = true;
+  if (mi) mi.value = '';
+  if (mc) mc.hidden = true;
   document.getElementById('searchDropdown').hidden = true;
-  document.getElementById('searchInput').setAttribute('aria-expanded', 'false');
-  renderProducts();
+  renderProducts(true);
 }
 
-// ─── Search Events ────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+// ─── DOM Ready ────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
 
-  const searchInput = document.getElementById('searchInput');
-  const searchClear = document.getElementById('searchClear');
-  const dropdown    = document.getElementById('searchDropdown');
+  // ── AOS init ────────────────────────────────
+  if (typeof AOS !== 'undefined') {
+    AOS.init({
+      duration: 650,
+      once: true,
+      offset: 60,
+      easing: 'ease-out-cubic',
+    });
+  }
 
-  // Live typing → show dropdown
-  searchInput.addEventListener('input', function () {
-    const val = this.value.trim();
+  // ── See More / See Less button ───────────────
+  document.getElementById('seeMoreBtn').addEventListener('click', function() {
+    var filtered   = getFiltered();
+    var isExpanded = visibleCount >= filtered.length;
+
+    if (isExpanded) {
+      // Collapse back to first page
+      visibleCount = PAGE_SIZE;
+      renderProducts(false);
+      var sec = document.getElementById('products');
+      var offset = sec.getBoundingClientRect().top + window.scrollY - 90;
+      window.scrollTo({ top: offset, behavior: 'smooth' });
+    } else {
+      // Load next page
+      appendMoreCards();
+    }
+  });
+
+  // ── Desktop Search ───────────────────────────
+  var searchInput = document.getElementById('searchInput');
+  var searchClear = document.getElementById('searchClear');
+  var dropdown    = document.getElementById('searchDropdown');
+
+  searchInput.addEventListener('input', function() {
+    var val = this.value.trim();
     searchClear.hidden = val === '';
-    renderDropdown(val);
-    // If user clears the input entirely, reset grid immediately
-    if (val === '') {
-      searchQuery = '';
-      renderProducts();
-    }
+    if (val === '') { searchQuery = ''; renderProducts(true); }
+    else renderDropdown(val);
   });
 
-  // Enter key → commit search
-  searchInput.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      commitSearch(this.value.trim());
-    }
-    if (e.key === 'Escape') {
-      dropdown.hidden = true;
-      this.blur();
-    }
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); commitSearch(this.value.trim()); }
+    if (e.key === 'Escape') { dropdown.hidden = true; this.blur(); }
   });
 
-  // Clear button
   searchClear.addEventListener('click', clearSearch);
-
-  // "Clear Search" bar button
   document.getElementById('searchClearAll').addEventListener('click', clearSearch);
-
-  // "Browse all products" in no-results
   document.getElementById('noResultsReset').addEventListener('click', clearSearch);
 
-  // Click outside dropdown → close it
-  document.addEventListener('click', function (e) {
-    if (!document.getElementById('navSearch').contains(e.target)) {
+  // Close dropdown on outside click
+  document.addEventListener('click', function(e) {
+    var navSearch = document.getElementById('navSearch');
+    if (navSearch && !navSearch.contains(e.target)) {
       dropdown.hidden = true;
       searchInput.setAttribute('aria-expanded', 'false');
     }
   });
 
-  // ─── Category Filter ────────────────────────────
-  document.getElementById('catsWrap').addEventListener('click', function (e) {
-    const chip = e.target.closest('.cat-chip');
+  // ── Category Filter ──────────────────────────
+  document.getElementById('catsWrap').addEventListener('click', function(e) {
+    var chip = e.target.closest('.cat-chip');
     if (!chip) return;
 
-    document.querySelectorAll('.cat-chip').forEach(c => {
+    document.querySelectorAll('.cat-chip').forEach(function(c) {
       c.classList.remove('active');
       c.setAttribute('aria-selected', 'false');
     });
     chip.classList.add('active');
     chip.setAttribute('aria-selected', 'true');
 
-    activeCat = chip.dataset.cat;
-    // Changing category clears the search query
+    activeCat   = chip.dataset.cat;
     searchQuery = '';
-    document.getElementById('searchInput').value = '';
-    searchClear.hidden = true;
+    if (searchInput) { searchInput.value = ''; searchClear.hidden = true; }
     dropdown.hidden = true;
 
-    renderProducts();
+    renderProducts(true);
 
-    const productsSection = document.getElementById('products');
-    const offset = productsSection.getBoundingClientRect().top + window.scrollY - 90;
+    var sec = document.getElementById('products');
+    var offset = sec.getBoundingClientRect().top + window.scrollY - 90;
     window.scrollTo({ top: offset, behavior: 'smooth' });
   });
 
-  // ─── Inject mobile search row into nav drawer ───
-  // We create a search row inside the nav drawer for small screens
-  // where the navbar search bar is hidden
-  const navLinks = document.getElementById('navLinks');
-
-  // Build the mobile search list item
-  const mobileSearchLi = document.createElement('li');
+  // ── Mobile search injection ──────────────────
+  var navLinks      = document.getElementById('navLinks');
+  var mobileSearchLi = document.createElement('li');
   mobileSearchLi.className = 'mobile-search-row';
-  mobileSearchLi.style.display = 'none'; // controlled by CSS media query
-  mobileSearchLi.innerHTML = `
-    <div class="search-wrap" id="mobileSearchWrap">
-      <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-      </svg>
-      <input
-        type="text"
-        id="mobileSearchInput"
-        class="search-input"
-        placeholder="Search products…"
-        autocomplete="off"
-        aria-label="Search products"
-      />
-      <button class="search-clear" id="mobileSearchClear" aria-label="Clear search" hidden>✕</button>
-    </div>
-  `;
+  mobileSearchLi.innerHTML =
+    '<div class="search-wrap">' +
+      '<svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>' +
+      '</svg>' +
+      '<input type="text" id="mobileSearchInput" class="search-input" placeholder="Search products…" autocomplete="off" aria-label="Search products"/>' +
+      '<button class="search-clear" id="mobileSearchClear" aria-label="Clear" hidden>✕</button>' +
+    '</div>';
   navLinks.prepend(mobileSearchLi);
 
-  // Wire up mobile search input (same logic as desktop)
-  const mobileInput = document.getElementById('mobileSearchInput');
-  const mobileClear = document.getElementById('mobileSearchClear');
+  var mobileInput = document.getElementById('mobileSearchInput');
+  var mobileClear = document.getElementById('mobileSearchClear');
 
-  mobileInput.addEventListener('input', function () {
-    const val = this.value.trim();
+  mobileInput.addEventListener('input', function() {
+    var val = this.value.trim();
     mobileClear.hidden = val === '';
-    // Also sync to desktop input
-    document.getElementById('searchInput').value = val;
+    searchInput.value  = val;
     searchClear.hidden = val === '';
-    if (val === '') {
-      searchQuery = '';
-      renderProducts();
-    } else {
-      renderDropdown(val);
-    }
+    if (val === '') { searchQuery = ''; renderProducts(true); }
+    else renderDropdown(val);
   });
 
-  mobileInput.addEventListener('keydown', function (e) {
+  mobileInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const val = this.value.trim();
-      // Close nav drawer
       navLinks.classList.remove('open');
       document.getElementById('navToggle').textContent = '☰';
-      commitSearch(val);
+      commitSearch(this.value.trim());
     }
   });
 
-  mobileClear.addEventListener('click', function () {
-    mobileInput.value = '';
-    this.hidden = true;
-    clearSearch();
-  });
+  mobileClear.addEventListener('click', clearSearch);
 
-  // ─── Mobile Nav Toggle ──────────────────────────
-  document.getElementById('navToggle').addEventListener('click', function () {
+  // ── Mobile Nav Toggle ────────────────────────
+  document.getElementById('navToggle').addEventListener('click', function() {
     navLinks.classList.toggle('open');
     this.textContent = navLinks.classList.contains('open') ? '✕' : '☰';
-    // Focus mobile search when drawer opens on small screen
     if (navLinks.classList.contains('open') && window.innerWidth <= 640) {
-      setTimeout(() => mobileInput.focus(), 150);
+      setTimeout(function() { mobileInput.focus(); }, 150);
     }
   });
 
-  document.getElementById('navLinks').addEventListener('click', function (e) {
+  navLinks.addEventListener('click', function(e) {
     if (e.target.tagName === 'A') {
       this.classList.remove('open');
       document.getElementById('navToggle').textContent = '☰';
     }
   });
 
-  // ─── Init ───────────────────────────────────────
-  renderProducts();
+  // ── Initial render ───────────────────────────
+  renderProducts(true);
 
-}); // end DOMContentLoadedx
+}); // end DOMContentLoaded

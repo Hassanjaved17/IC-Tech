@@ -501,7 +501,7 @@ body {
 
 .why-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1.1rem; margin-top: 1.75rem;
 }
 .why-card {
@@ -601,8 +601,103 @@ footer {
 .footer-map-link:hover { color: var(--accent); }
 
 /* ══════════════════════════════════════
-   RESPONSIVE — mobile-first, ordered small → large
+   CSS ANIMATIONS (own, no library needed for these)
 ══════════════════════════════════════ */
+
+/* Subtle float on hero badge */
+.hero-badge {
+  animation: floatBadge 3.5s ease-in-out infinite;
+}
+@keyframes floatBadge {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+/* Product card entrance — triggered when JS adds .card-visible */
+.prod-card {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease,
+    border-color 0.2s,
+    box-shadow 0.22s;
+}
+.prod-card.card-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stat number count-up shimmer */
+.stat-num {
+  background: linear-gradient(90deg, var(--text1) 0%, var(--accent) 50%, var(--text1) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position: -200% center; }
+}
+
+/* Why card icon pulse on hover */
+.why-card:hover .why-icon {
+  animation: iconPop 0.35s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+@keyframes iconPop {
+  0%   { transform: scale(1); }
+  60%  { transform: scale(1.2); }
+  100% { transform: scale(1.1); }
+}
+
+/* Nav logo subtle shimmer */
+.nav-logo span {
+  display: inline-block;
+  animation: accentPulse 3s ease-in-out infinite;
+}
+@keyframes accentPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.7; }
+}
+
+/* Badge dot already has blink — keep it */
+
+/* ══════════════════════════════════════
+   SEE MORE / SEE LESS BUTTON
+══════════════════════════════════════ */
+.see-more-wrap {
+  display: flex; justify-content: center;
+  margin-top: 2rem;
+}
+.see-more-btn {
+  display: inline-flex; align-items: center; gap: 0.55rem;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  color: var(--text1);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 2rem;
+  font-size: 0.9rem; font-weight: 500;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+.see-more-btn:hover {
+  background: var(--surface2);
+  border-color: var(--accent-border);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+.see-more-btn svg {
+  transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+  flex-shrink: 0;
+}
+.see-more-btn.expanded svg {
+  transform: rotate(180deg);
+}
+
+
 
 /* ── Small phones  ≤ 480px ── */
 @media (max-width: 480px) {
